@@ -16,11 +16,3 @@ func readPosts() ([]Post, error) {
 	err = json.Unmarshal(data, &posts)
 	return posts, err
 }
-
-// func writePosts(posts []Post) error {
-// 	data, err := json.MarshalIndent(posts, "", "  ")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return os.WriteFile("blog.json", data, 0644)
-// }
