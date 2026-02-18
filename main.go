@@ -7,6 +7,7 @@ import (
 )
 
 func main(){
+	InitDB()
 	http.HandleFunc("/",handler)
 	http.HandleFunc("/get",getHandler)
 	http.HandleFunc("/get/",getByIdHandler)
