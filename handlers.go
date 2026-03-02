@@ -65,6 +65,12 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	var newPost Post
 	json.NewDecoder(r.Body).Decode(&newPost)
 
+	for _, post := range posts {
+		if post.Title == newPost.Title && post.Author == newPost.Author {
+			http.Error(w, "Post already exists", http.StatusConflict)
+			return
+		}
+	}
 	newPost.ID = uuid.NewString()
 	now := time.Now().Format(time.RFC3339)
 
@@ -125,18 +131,20 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	parts := strings.Split(r.URL.Path, "/")
 	id := parts[2]
-	data, err := os.ReadFile("blog.json")
+	posts, err := readPosts()
 	if err != nil {
-		http.Error(w, "Failed", http.StatusInternalServerError)
+		http.Error(w, "Failed to read file", http.StatusInternalServerError)
 		return
 	}
-	var posts []Post
-	json.Unmarshal(data, &posts)
 
 	var updatedPost Post
-	json.NewDecoder(r.Body).Decode(&updatedPost)
+	if err := json.NewDecoder(r.Body).Decode(&updatedPost); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
 	found := false
+	var result Post
 	for i, post := range posts {
 		if post.ID == id {
 			if updatedPost.Title != "" {
@@ -149,6 +157,7 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 				posts[i].Author = updatedPost.Author
 			}
 			posts[i].UpdatedAt = time.Now().Format(time.RFC3339)
+			result = posts[i]
 			found = true
 			break
 		}
@@ -164,5 +173,5 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	os.WriteFile("blog.json", updatedData, 0644)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updatedPost)
+	json.NewEncoder(w).Encode(result)
 }
