@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/google/uuid"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +65,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	var newPost Post
 	json.NewDecoder(r.Body).Decode(&newPost)
 
+	newPost.ID = uuid.NewString()
 	now := time.Now().Format(time.RFC3339)
 
 	newPost.CreatedAt = now

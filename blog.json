@@ -1,1 +1,10 @@
-null
+[
+ {
+  "id": "4c9588c0-b23a-4466-a091-7d451c4fc742",
+  "title": "test1",
+  "content": "First post",
+  "author": "Adi",
+  "createdAt": "2026-02-12T16:21:23+05:30",
+  "updatedAt": "2026-02-12T16:21:23+05:30"
+ }
+]
