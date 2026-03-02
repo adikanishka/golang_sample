@@ -54,11 +54,34 @@ func getByIdHandler(w http.ResponseWriter, r *http.Request){
 
 }
 
+func postHandler(w http.ResponseWriter, r *http.Request){
+	data,err:=os.ReadFile("blog.json")
+	if err!=nil{
+		http.Error(w,"Failed",http.StatusInternalServerError)
+	}
+	var posts []Post
+	json.Unmarshal(data,&posts)
+
+	var newPost Post
+	json.NewDecoder(r.Body).Decode(&newPost)
+
+	posts=append(posts,newPost)
+	updatedBlog,err:=json.MarshalIndent(posts,""," ") //for readability in .json
+	if err != nil { 
+		http.Error(w, "Failed to convert JSON", http.StatusInternalServerError) 
+		return 
+	}
+	os.WriteFile("blog.json",updatedBlog,0644)
+	w.Header().Set("Content-Type","application/json")
+	json.NewEncoder(w).Encode(newPost)
+}
+
 
 func main(){
 	http.HandleFunc("/",handler)
 	http.HandleFunc("/get",getHandler)
 	http.HandleFunc("/get/",getByIdHandler)
+	http.HandleFunc("/post",postHandler)
 	fmt.Println("Server started....")
 	log.Fatal(http.ListenAndServe(":8080",nil))
 
