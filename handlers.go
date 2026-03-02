@@ -174,3 +174,37 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
+
+func blogHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+
+	case http.MethodGet:
+		getHandler(w, r)
+
+	case http.MethodPost:
+		postHandler(w, r)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func blogByIDHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+
+	case http.MethodGet:
+		getByIdHandler(w, r)
+
+	case http.MethodPut:
+		putHandler(w, r)
+
+	case http.MethodDelete:
+		deleteHandler(w, r)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
