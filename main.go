@@ -21,6 +21,10 @@ func handler(w http.ResponseWriter, r *http.Request){
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	data,err := os.ReadFile("blog.json")
 	if err!=nil{
 		http.Error(w,"Failed",http.StatusInternalServerError)
@@ -34,6 +38,10 @@ func getHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func getByIdHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	parts:=strings.Split(r.URL.Path,"/")
 	id:=parts[2]
 	data,err :=os.ReadFile("blog.json")
@@ -55,6 +63,10 @@ func getByIdHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	data,err:=os.ReadFile("blog.json")
 	if err!=nil{
 		http.Error(w,"Failed",http.StatusInternalServerError)
@@ -76,6 +88,10 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(newPost)
 }
 func deleteHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	parts := strings.Split(r.URL.Path, "/")
 	id := parts[2]
 	data,err:=os.ReadFile("blog.json")
@@ -104,6 +120,10 @@ func deleteHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	parts := strings.Split(r.URL.Path, "/")
 	id := parts[2]
 	data, err := os.ReadFile("blog.json")
