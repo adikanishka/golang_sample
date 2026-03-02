@@ -90,7 +90,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request){
 	for _, post := range posts {
 		if post.ID == id {
 			found = true
-			continue // skip this post (delete)
+			continue // to skip this post
 		}
 		updatedPosts = append(updatedPosts, post)
 	}
@@ -103,12 +103,49 @@ func deleteHandler(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func putHandler(w http.ResponseWriter, r *http.Request){
+	parts := strings.Split(r.URL.Path, "/")
+	id := parts[2]
+	data, err := os.ReadFile("blog.json")
+	if err != nil {
+		http.Error(w, "Failed", http.StatusInternalServerError)
+		return
+	}
+	var posts []Post
+	json.Unmarshal(data, &posts)
+
+	var updatedPost Post
+	json.NewDecoder(r.Body).Decode(&updatedPost)
+
+	found := false
+	for i, post := range posts {
+		if post.ID == id {
+			posts[i] = updatedPost
+			found = true
+			break
+		}
+	}
+	if !found {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+	updatedData, err := json.MarshalIndent(posts, "", "  ")
+	if err != nil {
+		http.Error(w, "Failed to convert JSON", http.StatusInternalServerError)
+		return
+	}
+	os.WriteFile("blog.json", updatedData, 0644)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedPost)
+}
+
 func main(){
 	http.HandleFunc("/",handler)
 	http.HandleFunc("/get",getHandler)
 	http.HandleFunc("/get/",getByIdHandler)
 	http.HandleFunc("/post",postHandler)
 	http.HandleFunc("/delete/",deleteHandler)
+	http.HandleFunc("/put/",putHandler)
 	fmt.Println("Server started....")
 	log.Fatal(http.ListenAndServe(":8080",nil))
 
