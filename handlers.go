@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 	"github.com/google/uuid"
@@ -78,15 +77,15 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	newPost.UpdatedAt = now
 
 	posts = append(posts, newPost)
-	updatedBlog, err := json.MarshalIndent(posts, "", " ") //for readability in .json
+	err = writePosts(posts)
 	if err != nil {
-		http.Error(w, "Failed to convert JSON", http.StatusInternalServerError)
+		http.Error(w, "Failed to save posts", http.StatusInternalServerError)
 		return
 	}
-	os.WriteFile("blog.json", updatedBlog, 0644)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(newPost)
 }
+
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -113,15 +112,14 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}else{
-		http.Error(w, "Post deleted successfully", http.StatusOK)
+		w.WriteHeader(http.StatusNoContent)
 	}
-	updatedData, err := json.MarshalIndent(updatedPosts, "", "  ")
+	err = writePosts(updatedPosts)
 	if err != nil {
-		http.Error(w, "Failed to convert JSON", http.StatusInternalServerError)
+		http.Error(w, "Failed to save posts", http.StatusInternalServerError)
 		return
 	}
-	err = os.WriteFile("blog.json", updatedData, 0644)
-	w.WriteHeader(http.StatusNoContent)
+
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +136,8 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var updatedPost Post
-	if err := json.NewDecoder(r.Body).Decode(&updatedPost); err != nil {
+	err = json.NewDecoder(r.Body).Decode(&updatedPost)
+	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -166,12 +165,12 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
-	updatedData, err := json.MarshalIndent(posts, "", "  ")
+	err = writePosts(posts)
 	if err != nil {
-		http.Error(w, "Failed to convert JSON", http.StatusInternalServerError)
+		http.Error(w, "Failed to save posts", http.StatusInternalServerError)
 		return
 	}
-	os.WriteFile("blog.json", updatedData, 0644)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
